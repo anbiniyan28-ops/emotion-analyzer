@@ -1,0 +1,15 @@
+2026-06-12 16:18:06,549 - INFO - AFC is enabled with max remote calls: 10.
+2026-06-12 16:18:10,249 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-06-12 16:18:10,258 - INFO - Emotion=Confused | Q=What should I do now?
+2026-06-12 16:22:22,401 - INFO - AFC is enabled with max remote calls: 10.
+2026-06-12 16:22:25,211 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 503 Service Unavailable"
+2026-06-12 16:22:25,220 - ERROR - 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+2026-06-12 16:22:29,492 - INFO - AFC is enabled with max remote calls: 10.
+2026-06-12 16:22:30,929 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 503 Service Unavailable"
+2026-06-12 16:22:30,931 - ERROR - 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+2026-06-12 16:22:41,840 - INFO - AFC is enabled with max remote calls: 10.
+2026-06-12 16:22:45,682 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-06-12 16:22:45,691 - INFO - Emotion=Confused | Q=i feel confused
+2026-06-12 16:24:50,450 - INFO - AFC is enabled with max remote calls: 10.
+2026-06-12 16:24:54,510 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2026-06-12 16:24:54,516 - INFO - Emotion=Frustrated | Q=wht should i do now

@@ -1,0 +1,26 @@
+[
+    {
+        "role": "user",
+        "content": "I feel stressed about exams"
+    },
+    {
+        "role": "assistant",
+        "content": "Try breaking it into small steps"
+    },
+    {
+        "role": "user",
+        "content": "I still feel confused"
+    },
+    {
+        "role": "user",
+        "content": "I feel stressed about exams"
+    },
+    {
+        "role": "assistant",
+        "content": "Try breaking it into small steps"
+    },
+    {
+        "role": "\"text\"",
+        "content": "\"I tried fixing my code for 3 hours but nothing works. I'm so frustrated and confused right now. This is ruining my day.\""
+    }
+]
