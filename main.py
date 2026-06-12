@@ -151,9 +151,10 @@ Rules:
 - emotion: Happy, Sad, Angry, Frustrated, Confused, Neutral
 - confidence: 0 to 1
 - summary: short reasoning
-- response: helpful answer
+- response: causal(like a normal human) helpful answer 
+- no need to be too formal, be casual and concise
 
-Conversation:
+Conversation: 
 {conversation}
 
 Question:
