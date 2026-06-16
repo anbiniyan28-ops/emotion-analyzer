@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from typing import List
 from dotenv import load_dotenv
@@ -28,6 +30,11 @@ app = FastAPI(
     description="AI Emotion Detection using Gemini",
     version="3.0"
 )
+
+# ----------------------------
+# SERVE FRONTEND
+# ----------------------------
+app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 
 # ----------------------------
 # CORS
@@ -60,18 +67,20 @@ def load_history():
         return []
 
     try:
-        with open(HISTORY_FILE, "r") as f:
+        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
-    except:
+    except Exception:
         return []
 
 
 def save_history(messages):
     history = load_history()
     history.extend(messages)
-    history = history[-10:]  # keep last 10 messages
 
-    with open(HISTORY_FILE, "w") as f:
+    # Keep only last 10 messages
+    history = history[-10:]
+
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(history, f, indent=4)
 
 
@@ -97,11 +106,15 @@ def call_gemini(prompt: str):
             model="gemini-2.5-flash",
             contents=prompt
         )
+
         return response.text
 
     except Exception as e:
         logging.error(str(e))
-        raise HTTPException(status_code=503, detail="Gemini API error")
+        raise HTTPException(
+            status_code=503,
+            detail=f"Gemini API error: {str(e)}"
+        )
 
 
 # ----------------------------
@@ -110,8 +123,9 @@ def call_gemini(prompt: str):
 def parse_json(raw: str):
     cleaned = raw.strip()
 
-    # remove code blocks if any
-    cleaned = cleaned.replace("```json", "").replace("```", "").strip()
+    cleaned = cleaned.replace("```json", "")
+    cleaned = cleaned.replace("```", "")
+    cleaned = cleaned.strip()
 
     return json.loads(cleaned)
 
@@ -124,15 +138,18 @@ def analyze_emotion(messages, question):
     history = load_history()
 
     current = [
-        {"role": m.role, "content": m.content}
+        {
+            "role": m.role,
+            "content": m.content
+        }
         for m in messages
     ]
 
     full_context = (history + current)[-10:]
 
     conversation = "\n".join(
-        f"{m['role']}: {m['content']}"
-        for m in full_context
+        f"{msg['role']}: {msg['content']}"
+        for msg in full_context
     )
 
     prompt = f"""
@@ -148,60 +165,73 @@ Return ONLY valid JSON:
 }}
 
 Rules:
-- emotion: Happy, Sad, Angry, Frustrated, Confused, Neutral
-- confidence: 0 to 1
-- summary: short reasoning
-- response: causal(like a normal human) helpful answer 
-- no need to be too formal, be casual and concise
+- emotion must be one of:
+  Happy, Sad, Angry, Frustrated, Confused, Neutral
+- confidence must be between 0 and 1
+- summary should be short
+- response should be casual, helpful, and human-like
+- do not be too formal
 
-Conversation: 
+Conversation:
 {conversation}
 
 Question:
 {question}
 
-Return ONLY JSON. No explanation.
+Return ONLY JSON.
 """
 
     raw = call_gemini(prompt)
+
     return parse_json(raw)
 
 
 # ----------------------------
 # ROUTES
 # ----------------------------
+
+# Open chatbot UI directly
 @app.get("/")
 def home():
-    return {"status": "ok", "message": "Emotion API V3 running 🚀"}
+    return FileResponse("frontend/index.html")
 
 
 @app.post("/analyze")
 def analyze(req: AnalyzeRequest):
 
     try:
-        result = analyze_emotion(req.messages, req.question)
+        result = analyze_emotion(
+            req.messages,
+            req.question
+        )
 
-        save_history([m.dict() for m in req.messages])
+        save_history(
+            [m.model_dump() for m in req.messages]
+        )
 
         logging.info(
-            f"Emotion={result.get('emotion')} | Q={req.question}"
+            f"Emotion={result.get('emotion')} | Question={req.question}"
         )
 
         return {
             "success": True,
             "emotion": result.get("emotion", "Neutral"),
-            "confidence": float(result.get("confidence", 0.5)),
+            "confidence": float(
+                result.get("confidence", 0.5)
+            ),
             "summary": result.get("summary", ""),
             "response": result.get("response", "")
         }
 
     except json.JSONDecodeError:
+
         raise HTTPException(
             status_code=500,
             detail="Gemini returned invalid JSON"
         )
 
     except Exception as e:
+
         raise HTTPException(
             status_code=500,
             detail=str(e)
@@ -210,15 +240,22 @@ def analyze(req: AnalyzeRequest):
 
 @app.get("/history")
 def get_history():
+
+    history = load_history()
+
     return {
-        "count": len(load_history()),
-        "history": load_history()
+        "count": len(history),
+        "history": history
     }
 
 
 @app.delete("/history")
 def clear_history():
-    with open(HISTORY_FILE, "w") as f:
+
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump([], f)
 
-    return {"success": True, "message": "History cleared"}
+    return {
+        "success": True,
+        "message": "History cleared"
+    }
