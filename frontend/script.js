@@ -7,27 +7,25 @@ function addMessage(text, sender) {
     const chatBox = document.getElementById("chat-box");
 
     const div = document.createElement("div");
-    div.classList.add("message", sender);
-
+    div.className = `message ${sender}`;
     div.innerText = text;
 
     chatBox.appendChild(div);
-
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 async function sendMessage() {
 
     const input = document.getElementById("message-input");
-
     const text = input.value.trim();
 
     if (!text) return;
 
+    // User message
     addMessage(text, "user");
 
     messages.push({
-        role: "USER",
+        role: "user",
         content: text
     });
 
@@ -48,14 +46,23 @@ async function sendMessage() {
 
         const data = await response.json();
 
+        if (!response.ok) {
+            throw new Error(
+                data.detail || "Request failed"
+            );
+        }
+
+        // SHOW ONLY BOT RESPONSE
         addMessage(data.response, "bot");
 
         messages.push({
-            role: "AI",
+            role: "assistant",
             content: data.response
         });
 
     } catch (error) {
+
+        console.error(error);
 
         addMessage(
             "Unable to connect to server.",
@@ -63,3 +70,18 @@ async function sendMessage() {
         );
     }
 }
+
+// Enter key support
+document.addEventListener("DOMContentLoaded", () => {
+
+    const input = document.getElementById("message-input");
+
+    input.addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+
+    });
+
+});

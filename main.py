@@ -9,6 +9,7 @@ from google import genai
 import os
 import json
 import logging
+import time
 
 # ----------------------------
 # LOAD ENV
@@ -101,33 +102,64 @@ class AnalyzeRequest(BaseModel):
 # GEMINI CALL
 # ----------------------------
 def call_gemini(prompt: str):
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
-        )
 
-        return response.text
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model="gemini-3.5-flash",
+                contents=prompt
+            )
 
-    except Exception as e:
-        logging.error(str(e))
-        raise HTTPException(
-            status_code=503,
-            detail=f"Gemini API error: {str(e)}"
-        )
+            return response.text
+
+        except Exception as e:
+
+            logging.error(
+                f"Gemini Attempt {attempt + 1}: {str(e)}"
+            )
+
+            if attempt < 2:
+                time.sleep(2)
+
+    raise HTTPException(
+        status_code=503,
+        detail="Gemini is currently busy. Please try again."
+    )
 
 
 # ----------------------------
 # CLEAN JSON
 # ----------------------------
 def parse_json(raw: str):
-    cleaned = raw.strip()
 
-    cleaned = cleaned.replace("```json", "")
-    cleaned = cleaned.replace("```", "")
-    cleaned = cleaned.strip()
+    try:
+        cleaned = raw.strip()
 
-    return json.loads(cleaned)
+        cleaned = cleaned.replace("```json", "")
+        cleaned = cleaned.replace("```", "")
+        cleaned = cleaned.strip()
+
+        return json.loads(cleaned)
+
+    except Exception as e:
+
+        logging.error(
+            f"JSON Parse Error: {str(e)}"
+        )
+
+        logging.error(
+            f"Raw Gemini Response: {raw}"
+        )
+
+        return {
+            "emotion": "Neutral",
+            "confidence": 0.5,
+            "summary": "Unable to parse model output.",
+            "response": (
+                "Sorry, I had trouble understanding that. "
+                "Could you try again?"
+            )
+        }
 
 
 # ----------------------------

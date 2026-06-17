@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chatbot</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion AI Assistant</title>
     <link rel="stylesheet" href="/frontend/style.css">
 </head>
 <body>
@@ -9,11 +11,11 @@
 <div class="chat-container">
 
     <div class="header">
-        Chatbot
+        🤖 Emotional Assistant
     </div>
 
-    <div id="chat-box" class="chat-box">
-    </div>
+
+    <div id="chat-box" class="chat-box"></div>
 
     <div class="input-area">
         <input
@@ -21,7 +23,10 @@
             id="message-input"
             placeholder="Type your message..."
         >
-        <button onclick="sendMessage()">Send</button>
+
+        <button onclick="sendMessage()">
+            Send
+        </button>
     </div>
 
 </div>
